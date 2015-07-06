@@ -9,6 +9,8 @@ using Android.Widget;
 using NavDrawer.Fragments;
 using NavDrawer.Helpers;
 using Android.Support.V7.App;
+using Android.Support.Design.Widget;
+using com.refractored.monodroidtoolkit.imageloader;
 
 namespace NavDrawer.Activities
 {
@@ -20,8 +22,10 @@ namespace NavDrawer.Activities
 		private string drawerTitle;
 		private string title;
 
+        private ImageLoader m_ImageLoader;
+
 		private DrawerLayout drawerLayout;
-		private ListView drawerListView;
+		//private ListView drawerListView;
 		private static readonly string[] Sections = new[] {
 			"Browse", "Friends", "Profile"
 		};
@@ -39,14 +43,31 @@ namespace NavDrawer.Activities
 			this.title = this.drawerTitle = this.Title;
 
 			this.drawerLayout = this.FindViewById<DrawerLayout> (Resource.Id.drawer_layout);
-			this.drawerListView = this.FindViewById<ListView> (Resource.Id.left_drawer);
 
+            var navigationView = FindViewById<NavigationView> (Resource.Id.nav_view);
+            if (navigationView != null) {
+                navigationView.NavigationItemSelected += (sender, e) => {
+                    switch (e.MenuItem.ItemId) {
+                    case Resource.Id.nav_home:
+                        ListItemClicked(0);
+                        break;
+                    case Resource.Id.nav_friends:
+                        ListItemClicked(1);
+                        break;
+                    case Resource.Id.nav_profile:
+                        ListItemClicked(2);
+                        break;
+                    default:
+                        break;
+                    }
 
-			//Create Adapter for drawer List
-			this.drawerListView.Adapter = new ArrayAdapter<string> (this, Resource.Layout.item_menu, Sections);
+                    e.MenuItem.SetChecked (true);
+                    drawerLayout.CloseDrawers ();
+                };
+            }
 
-			//Set click handler when item is selected
-			this.drawerListView.ItemClick += (sender, args) => ListItemClicked (args.Position);
+            //m_ImageLoader = new ImageLoader(this);
+            //m_ImageLoader.DisplayImage("https://lh6.googleusercontent.com/-cGOyhvv0Xb0/UQV41NcgFHI/AAAAAAAAKz4/MKYmmtSgajI/w140-h140-p/6b27f0ec682011e2bd9a22000a9f14ba_7.jpg", navigationView.FindViewById<ImageView> (Resource.Id.profile_image), -1);
 
 			//Set Drawer Shadow
 			this.drawerLayout.SetDrawerShadow (Resource.Drawable.drawer_shadow_dark, (int)GravityFlags.Start);
@@ -74,8 +95,6 @@ namespace NavDrawer.Activities
 			//Set the drawer lister to be the toggle.
 			this.drawerLayout.SetDrawerListener (this.drawerToggle);
 
-            
-
 			//if first time you will want to go ahead and click first item.
 			if (savedInstanceState == null) {
 				ListItemClicked (0);
@@ -101,7 +120,7 @@ namespace NavDrawer.Activities
 				.Replace (Resource.Id.content_frame, fragment)
 				.Commit ();
 
-			this.drawerListView.SetItemChecked (position, true);
+			//this.drawerListView.SetItemChecked (position, true);
 			SupportActionBar.Title = this.title = Sections [position];
 			this.drawerLayout.CloseDrawers();
 		}
